@@ -2,7 +2,6 @@ name: Wake up Streamlit app
 
 on:
   schedule:
-    # 20분마다 실행 (UTC 기준)
     - cron: "*/20 * * * *"
   workflow_dispatch:
 
@@ -12,6 +11,6 @@ jobs:
     steps:
       - name: Ping Streamlit app
         run: |
-          APP_URL="https://book-url-autofill-webapp-grlgymkppd2pvqefwwrd7c.streamlit.app/"
+          APP_URL="https://book-url-autofill-webapp-grlgymkppd2pvqefwwrd7c.streamlit.app/healthz"
           TS=$(date +%s)
-          curl -L --fail --max-time 30 "${APP_URL}?wakeup=${TS}"
+          curl -sS -L --max-time 30 -A "Mozilla/5.0" "${APP_URL}?wakeup=${TS}" || true
