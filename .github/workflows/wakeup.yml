@@ -9,16 +9,20 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Wake up Streamlit app (REAL)
+      - name: Wake up Streamlit app (no redirects)
         run: |
-          APP_URL="https://book-url-autofill-webapp-grlgymkppd2pvqefwwrd7c.streamlit.app/"
+          APP_URL="https://book-url-autofill-webapp-grlgymkppd2pvqefwwrd7c.streamlit.app"
           TS=$(date +%s)
+          URL="${APP_URL}?wakeup=${TS}"
 
-          echo "Pinging $APP_URL"
+          echo "URL: $URL"
 
-          curl -L --max-time 30 \
+          # 리다이렉트 따라가지 않음(-L 제거)
+          # 대신 HTTP 상태코드만 출력
+          curl -sS --max-time 30 \
             --retry 3 --retry-delay 10 --retry-all-errors \
             -A "Mozilla/5.0" \
             -H "Cache-Control: no-cache" \
-            "${APP_URL}?wakeup=${TS}" \
-            | head -c 200 || true
+            -o /dev/null \
+            -w "HTTP %{http_code}\n" \
+            "$URL" || true
