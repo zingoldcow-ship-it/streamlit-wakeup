@@ -2,15 +2,32 @@ name: Wake up Streamlit app
 
 on:
   schedule:
-    - cron: "*/20 * * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Streamlit app
+      - name: Ping Streamlit app (root) and show response
         run: |
-          APP_URL="https://book-url-autofill-webapp-grlgymkppd2pvqefwwrd7c.streamlit.app/healthz"
+          APP_URL="https://book-url-autofill-webapp-grlgymkppd2pvqefwwrd7c.streamlit.app/"
           TS=$(date +%s)
-          curl -sS -L --max-time 30 -A "Mozilla/5.0" "${APP_URL}?wakeup=${TS}" || true
+          URL="${APP_URL}?wakeup=${TS}"
+
+          echo "URL: $URL"
+
+          echo "---- HTTP status ----"
+          curl -sS -L --max-time 30 \
+            -A "Mozilla/5.0" \
+            -H "Cache-Control: no-cache" \
+            -o /tmp/body.html \
+            -w "%{http_code}\n" \
+            "$URL" || true
+
+          echo "---- Body (first 300 chars) ----"
+          head -c 300 /tmp/body.html || true
+          echo
+          echo "---- Body (contains 'Zzzz'?) ----"
+          grep -n "Zzzz" /tmp/body.html || echo "No 'Zzzz' found"
+
